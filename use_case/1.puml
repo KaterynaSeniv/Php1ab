@@ -1,0 +1,114 @@
+@startuml
+top to bottom direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam nodesep 15
+skinparam ranksep 35
+
+skinparam usecase {
+    BackgroundColor #F8F9FA
+    BorderColor #495057
+    ArrowColor #6C757D
+    FontSize 11
+}
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #CED4DA
+    FontStyle bold
+}
+
+' === АКТЕРИ ===
+actor "Неавторизований\nкористувач (Гість)" as Guest #ECEFF1
+actor "Пасажир" as Passenger #E3F2FD
+actor "Провідник" as Conductor #FFF3E0
+actor "Адміністратор" as Admin #FCE4EC
+
+Guest <|-- Passenger
+Guest <|-- Conductor
+Guest <|-- Admin
+
+' === СИСТЕМА ===
+rectangle "Система залізничних квитків" {
+
+    package "0. Публічний рівень (Гостьова зона)" #F8F9FA {
+        usecase "Пошук маршруту, розкладу\nта перегляд вільних місць" as G_Search
+        usecase "Перегляд правил перевезень\nта довідкової інформації" as G_Info
+        usecase "Авторизація / Реєстрація\n(Визначення ролі: RBAC)" as G_Auth
+    }
+
+    package "1. Кабінет Пасажира (Client App)" #F1F8FF {
+        ' Воронка купівлі
+        usecase "Крок 1: Вибір вагона та місця\nна інтерактивній схемі" as P_Seat
+        usecase "Крок 2: Вибір дод. послуг\n(постіль, чай, багаж, тварини)" as P_Extras
+        usecase "Крок 3: Введення ПІБ пасажира\nта застосування пільг" as P_Data
+        usecase "Крок 4: Оплата квитка" as P_Pay
+        usecase "Крок 5: Генерація QR-квитка\nта збереження у Wallet / PDF" as P_Ticket
+        
+        ' Основний хаб пасажира (поточні та минулі квитки)
+        usecase "Перегляд моїх квитків\n(активні поїздки та архів)" as P_History
+        usecase "Обмін або повернення квитка" as P_Refund
+        usecase "Керування профілем та\nшаблонами пасажирів" as P_Profile
+    }
+
+    package "2. Термінал Провідника (Staff App)" #FFFDF7 {
+        usecase "Вибір активного рейсу\nта закріпленого вагона" as C_Shift
+        usecase "Перегляд посадкової відомості\n(статуси місць, пільги, послуги)" as C_Manifest
+        usecase "Сканування QR-квитка та\nперевірка документів" as C_Scan
+        usecase "Ручна відмітка посадки\n(пошук за ПІБ / номером)" as C_Manual
+        usecase "Відмітка про видачу\nдод. послуг (постіль / напої)" as C_Service
+        usecase "Фіксація інцидентів або\nнеявки пасажира" as C_Report
+    }
+
+    package "3. Адмін-панель (Back-office)" #FFF5F8 {
+        usecase "Управління потягами та\nсхемами вагонів" as A_Trains
+        usecase "Формування маршрутів,\nстанцій та розкладу" as A_Schedule
+        usecase "Налаштування тарифів\nта пільгових коефіцієнтів" as A_Pricing
+        usecase "Екстрене скасування / затримка\nрейсу (автоповернення коштів)" as A_Cancel
+        usecase "Управління персоналом\nта правами доступу" as A_Users
+        usecase "Перегляд аналітики продажів\nта завантаженості рейсів" as A_Analytics
+    }
+}
+
+' === ЗВ'ЯЗКИ ГОСТЯ ===
+Guest --> G_Search
+Guest --> G_Info
+Guest --> G_Auth
+
+' === ЗВ'ЯЗКИ ПАСАЖИРА ===
+Passenger --> G_Search
+Passenger --> P_Seat
+Passenger --> P_History
+Passenger --> P_Profile
+
+' Логіка чекауту
+P_Seat ..> G_Auth : <<include>>
+P_Seat ..> P_Extras : далі
+P_Extras ..> P_Data : далі
+P_Data ..> P_Pay : далі
+P_Pay ..> P_Ticket : результат
+
+' Логіка управління квитками (Повернення/обмін виростає з перегляду історії/моїх квитків)
+P_History ..> P_Ticket : містить
+P_Refund ..> P_History : <<extend>>
+
+' === ЗВ'ЯЗКИ ПРОВІДНИКА ===
+Conductor --> C_Shift
+Conductor --> C_Scan
+Conductor --> C_Service
+Conductor --> C_Report
+
+C_Shift ..> C_Manifest : відкриває
+C_Scan ..> C_Manual : <<extend>>
+
+' === ЗВ'ЯЗКИ АДМІНІСТРАТОРА ===
+Admin --> A_Trains
+Admin --> A_Schedule
+Admin --> A_Pricing
+Admin --> A_Cancel
+Admin --> A_Users
+Admin --> A_Analytics
+
+A_Cancel ..> A_Schedule : <<extend>>
+
+@enduml
