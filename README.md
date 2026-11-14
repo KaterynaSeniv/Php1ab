@@ -1,7 +1,5 @@
 # Електронна система продажу залізничних квитків
 
-[![PHP CI Application](https://github.com/KaterynaSeniv/Php1ab/actions/workflows/phplab.yml/badge.svg)](https://github.com/KaterynaSeniv/phplab/actions/workflows/phplab.yml)
-
 ## 1. Загальна характеристика предметної галузі
 Проєкт є веб-додатком на базі фреймворку **Laravel (MVC)**, створеним для автоматизації процесів пошуку, бронювання та придбання залізничних квитків онлайн, а також для зручного управління розкладом руху потягів і схемою вільних місць.
 
