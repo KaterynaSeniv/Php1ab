@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate-docs:
+    name: Validate documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+
+      - name: Validate Composer dependencies
+        run: composer validate --no-check-publish
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Check PHP syntax and entry point
+        run: |
+          php -l index.php
+          find app -name '*.php' -print0 | xargs -0 -n1 php -l
+          php index.php > /dev/null
+
+      - name: Check documentation and diagrams
+        run: |
+          test -s index.md
+          test -s README.md
+          test -s use_case/1.puml
+          test -s use_case/1.png
+          test -s class_diagram/2.puml
+          test -s class_diagram/2.png
