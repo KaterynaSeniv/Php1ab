@@ -1,0 +1,176 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam roundcorner 6
+
+' === БАЗОВИЙ РІВЕНЬ ТА КОРИСТУВАЧІ ===
+class Guest {
+    +sessionId: String
+    +searchRoutes(from: Station, to: Station, date: Date): Collection<Route>
+    +viewStationInfo(station: Station): String
+    +viewRouteReviews(route: Route): Collection<Review>
+    +register(email: String, password: String): User
+    +login(email: String, password: String): User
+}
+
+class User {
+    +id: Int
+    +name: String
+    +email: String
+    +passwordHash: String
+    +role: String
+    +logout(): void
+    +updateProfile(): void
+    +resetPassword(): void
+}
+
+class Passenger {
+    +phone: String
+    +passportData: String
+    +savedPassengers: Collection<String>
+    +benefitType: String
+    +selectSeat(car: Car, seatNum: Int): void
+    +addExtraService(service: AdditionalService): void
+    +buyTicket(route: Route): Ticket
+    +exchangeTicket(oldTicket: Ticket, newRoute: Route): Ticket
+    +cancelTicket(ticket: Ticket): void
+    +getMyTickets(): Collection<Ticket>
+    +leaveReview(route: Route, rating: Int, comment: String): Review
+}
+
+class Conductor {
+    +badgeNumber: String
+    +assignedTrainId: Int
+    +assignedCarNumber: Int
+    +selectActiveShift(route: Route, car: Car): void
+    +getBoardingManifest(): Collection<Ticket>
+    +scanTicketQR(qrData: String): bool
+    +manualBoardPassenger(passengerName: String, seatNum: Int): void
+    +confirmServiceDelivery(ticket: Ticket, service: AdditionalService): void
+    +reportIssue(description: String): void
+}
+
+class Admin {
+    +accessLevel: Int
+    +manageTrainsAndCars(train: Train): void
+    +manageStations(station: Station): void
+    +manageSchedules(route: Route): void
+    +setRouteTariffs(route: Route, price: Float): void
+    +cancelRouteWithAutoRefund(route: Route): void
+    +manageUsersAndRoles(user: User, role: String): void
+    +viewSalesAnalytics(): String
+    +systemAudit(): void
+    +backupDatabase(): void
+}
+
+' === ТРАНСПОРТ ТА МАРШРУТИ ===
+class Station {
+    +id: Int
+    +name: String
+    +city: String
+    +stationCode: String
+    +getRoutes(): Collection<Route>
+    +updateStationInfo(): void
+}
+
+class Train {
+    +id: Int
+    +trainNumber: String
+    +trainType: String
+    +totalCars: Int
+    +addCar(car: Car): void
+    +getCarsList(): Collection<Car>
+    +checkTotalCapacity(): Int
+}
+
+class Car {
+    +id: Int
+    +carNumber: Int
+    +carType: String
+    +capacity: Int
+    +getFreeSeats(): Collection<Int>
+    +isSeatAvailable(seatNum: Int): bool
+    +updateCarStatus(status: String): void
+}
+
+class Route {
+    +id: Int
+    +departureTime: DateTime
+    +arrivalTime: DateTime
+    +basePrice: Float
+    +status: String
+    +updateRoutePrice(price: Float): void
+    +isAvailable(): bool
+    +getRouteDetails(): String
+    +assignTrain(train: Train): void
+    +cancelRoute(): void
+}
+
+' === КВИТКИ, ПОСЛУГИ, ОПЛАТА ТА ВІДГУКИ ===
+class Ticket {
+    +id: Int
+    +seatNumber: Int
+    +carNumber: Int
+    +passengerFullName: String
+    +status: String
+    +qrCodeData: String
+    +isBoarded: bool
+    +calculateTotalCost(): Float
+    +confirm(): void
+    +cancel(): void
+    +exchange(newRoute: Route, newSeat: Int): void
+    +generateQR(): String
+    +generatePDF(): String
+}
+
+class AdditionalService {
+    +id: Int
+    +serviceType: String
+    +price: Float
+    +isDelivered: bool
+    +markAsDelivered(): void
+}
+
+class Payment {
+    +id: Int
+    +amount: Float
+    +paymentMethod: String
+    +transactionStatus: String
+    +createdAt: DateTime
+    +processPayment(): bool
+    +refundPayment(): bool
+}
+
+class Review {
+    +id: Int
+    +rating: Int
+    +comment: String
+    +createdAt: Date
+    +isApproved: bool
+    +createReview(): void
+    +editReview(): void
+    +deleteReview(): void
+    +getAverageForRoute(route: Route): Float
+}
+
+' === ЗВ'ЯЗКИ МІЖ КЛАСАМИ ===
+Guest <|-- User : авторизується як
+User <|-- Passenger : наслідує
+User <|-- Conductor : наслідує
+User <|-- Admin : наслідує
+
+Train "1" *-- "1..*" Car : містить (композиція)
+Route "1" --> "1" Train : обслуговується (асоціація)
+Route "1" --> "2..*" Station : проходить через (асоціація)
+
+Passenger "1" --> "0..*" Ticket : оформлює (асоціація)
+Route "1" --> "0..*" Ticket : генерує (асоціація)
+Car "1" o-- "0..*" Ticket : бронює місця у (агрегація)
+
+Ticket "1" *-- "0..*" AdditionalService : включає (композиція)
+Ticket "1" *-- "1" Payment : оплачується через (композиція)
+
+Route "1" --> "0..*" Review : отримує (асоціація)
+Passenger "1" --> "0..*" Review : залишає (асоціація)
+
+@enduml
