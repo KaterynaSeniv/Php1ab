@@ -2,24 +2,24 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Service;
+use App\Models\Ticket;
+use App\Models\TrainRoute;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $services = Service::factory()->count(8)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        TrainRoute::factory()
+            ->count(5)
+            ->has(
+                Ticket::factory()
+                    ->count(6)
+                    ->hasAttached($services->random(2))
+            )
+            ->create();
     }
 }

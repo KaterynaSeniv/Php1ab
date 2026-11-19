@@ -4,80 +4,78 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Ticket;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TicketController extends Controller
 {
-    private array $tickets = [
-        [
-            'id' => 1,
-            'passenger_full_name' => 'Сенів Катерина Дмитрівна',
-            'car_number' => 5,
-            'seat_number' => 14,
-            'price' => 450.50,
-            'status' => 'booked',
-        ],
-        [
-            'id' => 2,
-            'passenger_full_name' => 'Коваленко Олександр Ігорович',
-            'car_number' => 3,
-            'seat_number' => 22,
-            'price' => 620.00,
-            'status' => 'paid',
-        ],
-    ];
-
     public function index(): JsonResponse
     {
+        $tickets = Ticket::query()
+            ->with([
+                'trainRoute:id,train_number,departure_station,arrival_station,departure_time',
+                'services:id,name,price',
+            ])
+            ->paginate(15);
+
         return response()->json([
             'status' => 'success',
-            'data' => $this->tickets,
+            'data' => $tickets,
         ], 200);
     }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'train_route_id' => ['required', 'integer', 'exists:train_routes,id'],
             'passenger_full_name' => ['required', 'string', 'min:3', 'max:255'],
             'car_number' => ['required', 'integer', 'min:1', 'max:25'],
             'seat_number' => ['required', 'integer', 'min:1', 'max:54'],
             'price' => ['required', 'numeric', 'min:0'],
+            'status' => ['nullable', 'string', 'in:booked,paid'],
+            'services' => ['nullable', 'array'],
+            'services.*' => ['integer', 'exists:services,id'],
         ]);
 
-        $newTicket = [
-            'id' => count($this->tickets) + 1,
+        $ticket = Ticket::create([
+            'train_route_id' => (int) $validated['train_route_id'],
             'passenger_full_name' => $validated['passenger_full_name'],
             'car_number' => (int) $validated['car_number'],
             'seat_number' => (int) $validated['seat_number'],
             'price' => (float) $validated['price'],
-            'status' => 'booked',
-        ];
+            'status' => $validated['status'] ?? 'booked',
+        ]);
 
-        $this->tickets[] = $newTicket;
+        if (! empty($validated['services'])) {
+            $ticket->services()->sync($validated['services']);
+        }
+
+        $ticket->load([
+            'trainRoute:id,train_number,departure_station,arrival_station',
+            'services:id,name,price',
+        ]);
 
         return response()->json([
             'status' => 'created',
-            'data' => $newTicket,
+            'data' => $ticket,
         ], 201);
     }
 
     public function show(string $id): JsonResponse
     {
-        $ticketId = (int) $id;
+        $ticket = Ticket::with(['trainRoute', 'services'])->find((int) $id);
 
-        foreach ($this->tickets as $ticket) {
-            if ($ticket['id'] === $ticketId) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $ticket,
-                ], 200);
-            }
+        if (! $ticket) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Квиток із зазначеним ідентифікатором не знайдено.',
+            ], 404);
         }
 
         return response()->json([
-            'status' => 'error',
-            'message' => 'Квиток із зазначеним ідентифікатором не знайдено.',
-        ], 404);
+            'status' => 'success',
+            'data' => $ticket,
+        ], 200);
     }
 }

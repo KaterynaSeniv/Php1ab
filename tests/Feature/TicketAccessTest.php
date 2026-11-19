@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Models\TrainRoute;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TicketAccessTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_request_without_partner_header_is_blocked_by_middleware(): void
     {
         $response = $this->postJson('/tickets', [
-            'passenger_full_name' => 'Шевченко Тарас Григорович',
-            'car_number' => 4,
-            'seat_number' => 11,
-            'price' => 520.00,
+            'passenger_full_name' => 'Іваненко Іван',
         ]);
 
         $response->assertStatus(403)
@@ -25,10 +26,13 @@ class TicketAccessTest extends TestCase
 
     public function test_request_with_valid_header_passes_middleware(): void
     {
+        $route = TrainRoute::factory()->create();
+
         $response = $this->withHeaders([
             'X-Partner-Key' => 'RAILWAY-PARTNER-2026',
         ])->postJson('/tickets', [
-            'passenger_full_name' => 'Шевченко Тарас Григорович',
+            'train_route_id' => $route->id,
+            'passenger_full_name' => 'Іваненко Іван Іванович',
             'car_number' => 4,
             'seat_number' => 11,
             'price' => 520.00,

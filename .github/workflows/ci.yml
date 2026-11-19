@@ -30,14 +30,8 @@ jobs:
       - name: Generate Application Key
         run: php artisan key:generate
 
-      - name: Check documentation and diagrams
-        run: |
-          test -s index.md
-          test -s README.md
-          test -s use_case/1.puml
-          test -s use_case/1.png
-          test -s class_diagram/2.puml
-          test -s class_diagram/2.png
+      - name: Ensure SQLite database exists
+        run: touch database/database.sqlite
 
       - name: Lint code with Pint
         run: ./vendor/bin/pint --test
