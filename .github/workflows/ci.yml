@@ -1,38 +1,34 @@
-name: CI
+name: Laravel CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: read
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  validate-docs:
-    name: Validate documentation
+  laravel-tests:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up PHP
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '8.4'
+          extensions: mbstring, dom, fileinfo, sqlite3, pdo_sqlite
+          coverage: none
 
-      - name: Validate Composer dependencies
-        run: composer validate --no-check-publish
+      - name: Copy .env file
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
+      - name: Install Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-progress --prefer-dist
 
-      - name: Check PHP syntax and entry point
-        run: |
-          php -l index.php
-          find app -name '*.php' -print0 | xargs -0 -n1 php -l
-          php index.php > /dev/null
+      - name: Generate Application Key
+        run: php artisan key:generate
 
       - name: Check documentation and diagrams
         run: |
@@ -42,3 +38,9 @@ jobs:
           test -s use_case/1.png
           test -s class_diagram/2.puml
           test -s class_diagram/2.png
+
+      - name: Lint code with Pint
+        run: ./vendor/bin/pint --test
+
+      - name: Run Application Tests
+        run: php artisan test
