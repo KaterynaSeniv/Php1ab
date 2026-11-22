@@ -9,10 +9,23 @@ class ServiceFactory extends Factory
 {
     public function definition(): array
     {
-        $name = fake()->unique()->words(2, true);
+        $services = [
+            'Постільна білизна',
+            'Сніданок у вагоні',
+            'Обід у вагоні',
+            'Чай та кава',
+            'Страхування подорожі',
+            'Транспортування багажу',
+            'Інтернет Wi-Fi',
+            'Кондиціонер',
+            'Періодичні видання',
+            'Напої (вода, сік)',
+        ];
+
+        $name = fake()->unique()->randomElement($services);
 
         return [
-            'name' => ucfirst($name),
+            'name' => $name,
             'slug' => Str::slug($name),
             'price' => fake()->randomFloat(2, 20, 250),
         ];

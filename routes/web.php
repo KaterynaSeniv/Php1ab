@@ -3,27 +3,18 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\RouteScheduleController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('home');
+})->name('home');
 
-Route::get('/health', fn () => response()->json([
-    'status' => 'OK',
-    'service' => 'Railway Ticket Sales System',
-    'timestamp' => now(),
-]));
+Route::get('/search', [RouteScheduleController::class, 'search'])->name('home.search');
 
-Route::get('/routes', [RouteScheduleController::class, 'index'])->name('routes.index');
-
-Route::prefix('tickets')->name('tickets.')->group(function () {
-    Route::get('/', [TicketController::class, 'index'])->name('index');
-    Route::post('/', [TicketController::class, 'store'])
-        ->middleware('ticket.access')
-        ->name('store');
-    Route::get('/{id}', [TicketController::class, 'show'])
-        ->whereNumber('id')
-        ->name('show');
-});
+Route::resource('routes', RouteScheduleController::class);
+Route::resource('services', ServiceController::class);
+Route::resource('tickets', TicketController::class);
+Route::put('/tickets/{ticket}/pay', [TicketController::class, 'pay'])->name('tickets.pay');
+Route::get('/tickets/{ticket}/voucher', [TicketController::class, 'voucher'])->name('tickets.voucher');
