@@ -17,7 +17,41 @@ class TrainRoute extends Model
         'departure_station',
         'arrival_station',
         'departure_time',
+        'base_price',
+        'car_count',
+        'seats_per_car',
+        'car_type',
     ];
+
+    protected $casts = [
+        'departure_time' => 'datetime',
+        'base_price' => 'float',
+        'car_count' => 'integer',
+        'seats_per_car' => 'integer',
+    ];
+
+    public function formattedDeparture(): string
+    {
+        return $this->departure_time?->format('d.m.Y H:i') ?? '—';
+    }
+
+    public function datetimeLocalValue(): string
+    {
+        return $this->departure_time?->format('Y-m-d\TH:i') ?? '';
+    }
+
+    public function isSeatTaken(int $carNumber, int $seatNumber, ?int $exceptTicketId = null): bool
+    {
+        $query = $this->tickets()
+            ->where('car_number', $carNumber)
+            ->where('seat_number', $seatNumber);
+
+        if ($exceptTicketId !== null) {
+            $query->where('id', '!=', $exceptTicketId);
+        }
+
+        return $query->exists();
+    }
 
     public function tickets(): HasMany
     {

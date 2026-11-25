@@ -19,6 +19,10 @@ class VerifyPartnerKey
             ], 403);
         }
 
+        if (! $request->wantsJson()) {
+            return $next($request);
+        }
+
         $response = $next($request);
 
         $response->headers->set('X-Railway-Security', 'Verified');

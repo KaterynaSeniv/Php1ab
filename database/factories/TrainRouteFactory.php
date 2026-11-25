@@ -17,6 +17,10 @@ class TrainRouteFactory extends Factory
             'departure_station' => $departure,
             'arrival_station' => $arrival,
             'departure_time' => fake()->dateTimeBetween('+1 day', '+1 month'),
+            'base_price' => fake()->randomFloat(2, 200, 800),
+            'car_count' => fake()->numberBetween(5, 15),
+            'seats_per_car' => fake()->numberBetween(36, 54),
+            'car_type' => fake()->randomElement(['coupe', 'platskart']),
         ];
     }
 }
