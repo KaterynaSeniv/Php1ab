@@ -13,6 +13,10 @@
         </div>
         <div class="card-body p-4">
             <div class="text-center mb-4">
+                <div id="voucherQr" class="d-inline-block p-3 bg-white border rounded"></div>
+                <div class="small text-muted mt-2">Покажіть QR-код провіднику для перевірки посадки</div>
+            </div>
+            <div class="text-center mb-4">
                 <span class="badge bg-success fs-5 px-4 py-2">№{{ $ticket->id }}</span>
                 <span class="badge bg-info fs-5 px-4 py-2 ms-3">ОПЛАЧЕНО</span>
             </div>
@@ -109,4 +113,18 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(document.getElementById('voucherQr'), {
+            text: @json(route('conductor.scan', $ticket->qr_token)),
+            width: 220,
+            height: 220,
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    }
+});
+</script>
 @endsection

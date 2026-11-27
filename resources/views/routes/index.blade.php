@@ -10,9 +10,11 @@
         </h1>
         <p class="text-muted small mb-0">Керування маршрутами та розкладом поїздів</p>
     </div>
-    <a href="{{ route('routes.create') }}" class="btn btn-success btn-lg">
-        <i class="bi bi-plus-circle me-1"></i>Додати рейс
-    </a>
+    @can('create', App\Models\TrainRoute::class)
+        <a href="{{ route('routes.create') }}" class="btn btn-success btn-lg">
+            <i class="bi bi-plus-circle me-1"></i>Додати рейс
+        </a>
+    @endcan
 </div>
 
 <div class="card shadow-lg border-0">
@@ -57,16 +59,20 @@
                                 <a href="{{ route('routes.show', $route->id) }}" class="btn btn-outline-info" title="Перегляд">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('routes.edit', $route->id) }}" class="btn btn-outline-warning" title="Редагувати">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('routes.destroy', $route->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Видалити цей рейс разом із квитками?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger" title="Видалити">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @can('update', $route)
+                                    <a href="{{ route('routes.edit', $route->id) }}" class="btn btn-outline-warning" title="Редагувати">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endcan
+                                @can('delete', $route)
+                                    <form action="{{ route('routes.destroy', $route->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Видалити цей рейс разом із квитками?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Видалити">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

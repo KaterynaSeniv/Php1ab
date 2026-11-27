@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\TrainRoute;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -59,7 +60,7 @@ class RouteViewTest extends TestCase
             ->assertSee('043К')
             ->assertSee('Київ-Пасажирський')
             ->assertSee('Івано-Франківськ')
-            ->assertSee('Додати рейс');
+            ->assertDontSee('Додати рейс');
 
         $this->get('/')
             ->assertOk()
@@ -72,7 +73,9 @@ class RouteViewTest extends TestCase
 
     public function test_create_route_form_validates_invalid_input(): void
     {
-        $response = $this->from('/routes/create')->post('/routes', [
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->from('/routes/create')->post('/routes', [
             'train_number' => '',
             'departure_station' => '',
             'arrival_station' => '',
@@ -98,7 +101,9 @@ class RouteViewTest extends TestCase
 
     public function test_user_can_create_and_update_route_via_web_forms(): void
     {
-        $createResponse = $this->post('/routes', [
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $createResponse = $this->actingAs($admin)->post('/routes', [
             'train_number' => '081К',
             'departure_station' => 'Львів',
             'arrival_station' => 'Одеса',
@@ -120,7 +125,7 @@ class RouteViewTest extends TestCase
 
         $route = TrainRoute::where('train_number', '081К')->firstOrFail();
 
-        $updateResponse = $this->put("/routes/{$route->id}", [
+        $updateResponse = $this->actingAs($admin)->put("/routes/{$route->id}", [
             'train_number' => '081К',
             'departure_station' => 'Львів',
             'arrival_station' => 'Харків',

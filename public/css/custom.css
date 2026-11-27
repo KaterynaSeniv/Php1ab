@@ -48,6 +48,39 @@ body {
     box-shadow: var(--shadow);
     border-bottom: 1px solid var(--border);
     padding: 0.75rem 0;
+    position: relative;
+    z-index: 1030;
+}
+
+.user-dropdown {
+    position: relative;
+}
+
+.user-dropdown-toggle {
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-dropdown .dropdown-menu {
+    width: 220px;
+    max-width: calc(100vw - 2rem);
+    margin-top: 0.5rem;
+    z-index: 1050;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-xl);
+}
+
+.user-dropdown .dropdown-item,
+.user-dropdown .dropdown-item-text {
+    border-radius: 0.5rem;
+}
+
+.user-dropdown .dropdown-item {
+    padding: 0.625rem 0.75rem;
 }
 
 .navbar-brand {
@@ -523,6 +556,31 @@ h3 {
 
     h1 {
         font-size: 1.75rem;
+    }
+
+    .navbar-collapse {
+        padding-top: 0.75rem;
+    }
+
+    .navbar-collapse > .d-flex {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+
+    .user-dropdown {
+        width: 100%;
+    }
+
+    .user-dropdown-toggle {
+        width: 100%;
+        max-width: none;
+    }
+
+    .user-dropdown .dropdown-menu {
+        width: 100%;
+        max-width: 100%;
+        position: static;
+        margin-top: 0.5rem;
     }
 }
 

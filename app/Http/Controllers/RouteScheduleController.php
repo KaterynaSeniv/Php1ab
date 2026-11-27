@@ -59,11 +59,15 @@ class RouteScheduleController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', TrainRoute::class);
+
         return view('routes.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', TrainRoute::class);
+
         $validated = $request->validate([
             'train_number' => ['required', 'string', 'unique:train_routes,train_number'],
             'departure_station' => ['required', 'string', 'min:2', 'max:100'],
@@ -112,11 +116,15 @@ class RouteScheduleController extends Controller
 
     public function edit(TrainRoute $route): View
     {
+        $this->authorize('update', $route);
+
         return view('routes.edit', compact('route'));
     }
 
     public function update(Request $request, TrainRoute $route): RedirectResponse
     {
+        $this->authorize('update', $route);
+
         $validated = $request->validate([
             'train_number' => ['required', 'string', 'unique:train_routes,train_number,'.$route->id],
             'departure_station' => ['required', 'string', 'min:2', 'max:100'],
@@ -157,6 +165,8 @@ class RouteScheduleController extends Controller
 
     public function destroy(TrainRoute $route): RedirectResponse
     {
+        $this->authorize('delete', $route);
+
         $route->delete();
 
         return redirect()

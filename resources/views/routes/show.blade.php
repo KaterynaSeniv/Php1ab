@@ -83,6 +83,8 @@
         </h4>
     </div>
     <div class="card-body">
+        @auth
+        @if (in_array(auth()->user()->role, ['admin', 'conductor']))
         @forelse ($route->tickets as $ticket)
             <div class="d-flex justify-content-between align-items-center border-bottom py-3">
                 <div>
@@ -105,15 +107,29 @@
                 На цей рейс ще не оформлено жодного квитка.
             </p>
         @endforelse
+        @else
+        <p class="text-center text-muted py-5">Деталі пасажирів доступні провіднику та адміністратору.</p>
+        @endif
+        @else
+        <p class="text-center text-muted py-5">Увійдіть у систему для перегляду бронювань рейсу.</p>
+        @endauth
     </div>
 </div>
 
 <div class="mt-3 d-flex gap-3">
-    <a href="{{ route('routes.edit', $route->id) }}" class="btn btn-warning btn-lg">
-        <i class="bi bi-pencil me-1"></i>Редагувати рейс
-    </a>
-    <a href="{{ route('tickets.create', ['route_id' => $route->id]) }}" class="btn btn-success btn-lg">
-        <i class="bi bi-plus-circle me-1"></i>Оформити квиток
-    </a>
+    @can('update', $route)
+        <a href="{{ route('routes.edit', $route->id) }}" class="btn btn-warning btn-lg">
+            <i class="bi bi-pencil me-1"></i>Редагувати рейс
+        </a>
+    @endcan
+    @auth
+        <a href="{{ route('tickets.create', ['route_id' => $route->id]) }}" class="btn btn-success btn-lg">
+            <i class="bi bi-plus-circle me-1"></i>Оформити квиток
+        </a>
+    @else
+        <a href="{{ route('login') }}" class="btn btn-success btn-lg">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Увійти для бронювання
+        </a>
+    @endauth
 </div>
 @endsection

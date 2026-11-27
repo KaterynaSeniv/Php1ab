@@ -15,9 +15,11 @@
         <p class="mb-0"><strong class="text-muted">Кількість квитків із цією послугою:</strong> <span class="badge bg-secondary">{{ $service->tickets->count() }}</span></p>
     </div>
     <div class="card-footer bg-white d-flex gap-2">
-        <a href="{{ route('services.edit', $service->id) }}" class="btn btn-warning">
-            <i class="bi bi-pencil me-1"></i>Редагувати
-        </a>
+        @can('update', $service)
+            <a href="{{ route('services.edit', $service->id) }}" class="btn btn-warning">
+                <i class="bi bi-pencil me-1"></i>Редагувати
+            </a>
+        @endcan
         <a href="{{ route('services.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i>Назад до списку
         </a>

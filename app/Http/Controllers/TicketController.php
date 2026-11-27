@@ -9,13 +9,17 @@ use App\Models\Ticket;
 use App\Models\TrainRoute;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class TicketController extends Controller
 {
     public function index(): View
     {
+        $this->authorize('viewAny', Ticket::class);
+
         $tickets = Ticket::query()
+            ->when(auth()->user()->role === 'passenger', fn ($query) => $query->where('user_id', auth()->id()))
             ->with([
                 'trainRoute:id,train_number,departure_station,arrival_station,departure_time',
                 'services:id,name,price',
@@ -28,6 +32,8 @@ class TicketController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Ticket::class);
+
         $routes = TrainRoute::orderBy('train_number')->get();
         $services = Service::orderBy('name')->get();
 
@@ -48,6 +54,8 @@ class TicketController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', Ticket::class);
+
         $validated = $request->validate([
             'train_route_id' => ['required', 'integer', 'exists:train_routes,id'],
             'passenger_full_name' => ['required', 'string', 'min:3', 'max:255'],
@@ -83,6 +91,8 @@ class TicketController extends Controller
         $totalPrice = $basePrice + $servicesPrice;
 
         $ticket = Ticket::create([
+            'qr_token' => Str::random(64),
+            'user_id' => $request->user()->id,
             'train_route_id' => (int) $validated['train_route_id'],
             'passenger_full_name' => $validated['passenger_full_name'],
             'car_number' => (int) $validated['car_number'],
@@ -100,6 +110,8 @@ class TicketController extends Controller
 
     public function show(Ticket $ticket): View
     {
+        $this->authorize('view', $ticket);
+
         $ticket->load(['trainRoute', 'services']);
 
         return view('tickets.show', compact('ticket'));
@@ -107,6 +119,8 @@ class TicketController extends Controller
 
     public function edit(Ticket $ticket): View
     {
+        $this->authorize('update', $ticket);
+
         $routes = TrainRoute::orderBy('train_number')->get();
         $services = Service::orderBy('name')->get();
         $ticket->load('services');
@@ -130,6 +144,8 @@ class TicketController extends Controller
 
     public function update(Request $request, Ticket $ticket): RedirectResponse
     {
+        $this->authorize('update', $ticket);
+
         $validated = $request->validate([
             'train_route_id' => ['required', 'integer', 'exists:train_routes,id'],
             'passenger_full_name' => ['required', 'string', 'min:3', 'max:255'],
@@ -188,6 +204,8 @@ class TicketController extends Controller
 
     public function destroy(Ticket $ticket): RedirectResponse
     {
+        $this->authorize('delete', $ticket);
+
         $ticket->delete();
 
         return redirect()
@@ -197,6 +215,8 @@ class TicketController extends Controller
 
     public function pay(Ticket $ticket): RedirectResponse
     {
+        $this->authorize('pay', $ticket);
+
         if ($ticket->status === 'paid') {
             return redirect()
                 ->route('tickets.show', $ticket->id)
@@ -212,6 +232,8 @@ class TicketController extends Controller
 
     public function voucher(Ticket $ticket): View
     {
+        $this->authorize('view', $ticket);
+
         $ticket->load(['trainRoute', 'services']);
 
         return view('tickets.voucher', compact('ticket'));
