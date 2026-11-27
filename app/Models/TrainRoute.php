@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TrainRoute extends Model
@@ -56,5 +57,12 @@ class TrainRoute extends Model
     public function tickets(): HasMany
     {
         return $this->hasMany(Ticket::class);
+    }
+
+    public function conductors(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'conductor_route_assignments', 'train_route_id', 'conductor_id')
+            ->withPivot(['shift_start', 'shift_end', 'cars_scope', 'instructions'])
+            ->withTimestamps();
     }
 }

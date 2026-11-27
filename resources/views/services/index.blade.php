@@ -10,9 +10,11 @@
         </h1>
         <p class="text-muted small mb-0">Керування переліком та тарифами на додаткові послуги</p>
     </div>
-    <a href="{{ route('services.create') }}" class="btn btn-warning btn-lg">
-        <i class="bi bi-plus-circle me-1"></i>Додати послугу
-    </a>
+    @can('create', App\Models\Service::class)
+        <a href="{{ route('services.create') }}" class="btn btn-warning btn-lg">
+            <i class="bi bi-plus-circle me-1"></i>Додати послугу
+        </a>
+    @endcan
 </div>
 
 <div class="card shadow-lg border-0">
@@ -41,16 +43,20 @@
                                 <a href="{{ route('services.show', $service->id) }}" class="btn btn-outline-info" title="Перегляд">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('services.edit', $service->id) }}" class="btn btn-outline-warning" title="Редагувати">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('services.destroy', $service->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Видалити цю послугу?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger" title="Видалити">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @can('update', $service)
+                                    <a href="{{ route('services.edit', $service->id) }}" class="btn btn-outline-warning" title="Редагувати">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endcan
+                                @can('delete', $service)
+                                    <form action="{{ route('services.destroy', $service->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Видалити цю послугу?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Видалити">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>

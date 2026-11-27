@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,12 +25,14 @@ class ServiceViewTest extends TestCase
         $response->assertStatus(200)
             ->assertSee('Постільна білизна')
             ->assertSee('150.00')
-            ->assertSee('Додати послугу');
+            ->assertDontSee('Додати послугу');
     }
 
     public function test_create_service_form_validates_invalid_input(): void
     {
-        $response = $this->from('/services/create')->post('/services', [
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)->from('/services/create')->post('/services', [
             'name' => '',
             'price' => 'invalid',
         ]);
@@ -43,7 +46,9 @@ class ServiceViewTest extends TestCase
 
     public function test_user_can_create_and_update_service_via_web_forms(): void
     {
-        $createResponse = $this->post('/services', [
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $createResponse = $this->actingAs($admin)->post('/services', [
             'name' => 'Страхування подорожі',
             'price' => 200.50,
         ]);
@@ -58,7 +63,7 @@ class ServiceViewTest extends TestCase
 
         $service = Service::where('name', 'Страхування подорожі')->firstOrFail();
 
-        $updateResponse = $this->put("/services/{$service->id}", [
+        $updateResponse = $this->actingAs($admin)->put("/services/{$service->id}", [
             'name' => 'Страхування подорожі (Преміум)',
             'price' => 350.00,
         ]);

@@ -14,6 +14,11 @@
         </span>
     </div>
     <div class="card-body">
+        <div class="text-center border-bottom pb-4 mb-4">
+            <div id="ticketQr" class="d-inline-block p-3 bg-white border rounded"></div>
+            <div class="small text-muted mt-2">QR-код для перевірки посадки</div>
+            <div class="font-monospace small text-break">{{ $ticket->qr_token }}</div>
+        </div>
         <dl class="row mb-0">
             <dt class="col-sm-4 text-muted">ПІБ пасажира:</dt>
             <dd class="col-sm-8 fw-semibold">{{ $ticket->passenger_full_name }}</dd>
@@ -49,20 +54,39 @@
     </div>
     <div class="card-footer bg-white d-flex gap-3">
         @if ($ticket->status === 'booked')
-            <form action="{{ route('tickets.pay', $ticket->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                <button type="submit" class="btn btn-success btn-lg">
-                    <i class="bi bi-credit-card me-1"></i>Оплатити квиток
-                </button>
-            </form>
+            @can('pay', $ticket)
+                <form action="{{ route('tickets.pay', $ticket->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-credit-card me-1"></i>Оплатити квиток
+                    </button>
+                </form>
+            @endcan
         @endif
-        <a href="{{ route('tickets.edit', $ticket->id) }}" class="btn btn-warning btn-lg">
-            <i class="bi bi-pencil me-1"></i>Редагувати
-        </a>
+        @can('update', $ticket)
+            <a href="{{ route('tickets.edit', $ticket->id) }}" class="btn btn-warning btn-lg">
+                <i class="bi bi-pencil me-1"></i>Редагувати
+            </a>
+        @endcan
         <a href="{{ route('tickets.index') }}" class="btn btn-light btn-lg">
             <i class="bi bi-arrow-left me-1"></i>Назад до списку
         </a>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof QRCode === 'undefined') {
+        return;
+    }
+    new QRCode(document.getElementById('ticketQr'), {
+        text: @json(route('conductor.scan', $ticket->qr_token)),
+        width: 180,
+        height: 180,
+        correctLevel: QRCode.CorrectLevel.M
+    });
+});
+</script>
 @endsection

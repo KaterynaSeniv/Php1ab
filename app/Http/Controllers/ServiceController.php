@@ -24,11 +24,15 @@ class ServiceController extends Controller
 
     public function create(): View
     {
+        $this->authorize('create', Service::class);
+
         return view('services.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', Service::class);
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'min:2', 'max:100', 'unique:services,name'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -61,11 +65,15 @@ class ServiceController extends Controller
 
     public function edit(Service $service): View
     {
+        $this->authorize('update', $service);
+
         return view('services.edit', compact('service'));
     }
 
     public function update(Request $request, Service $service): RedirectResponse
     {
+        $this->authorize('update', $service);
+
         $validated = $request->validate([
             'name' => [
                 'required',
@@ -90,6 +98,8 @@ class ServiceController extends Controller
 
     public function destroy(Service $service): RedirectResponse
     {
+        $this->authorize('delete', $service);
+
         $service->delete();
 
         return redirect()

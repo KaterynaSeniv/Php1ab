@@ -66,16 +66,20 @@
                                 <a href="{{ route('tickets.show', $ticket->id) }}" class="btn btn-outline-info" title="Перегляд">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('tickets.edit', $ticket->id) }}" class="btn btn-outline-warning" title="Редагувати">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('tickets.destroy', $ticket->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Ви дійсно бажаєте видалити цей квиток?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-outline-danger" title="Видалити">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @can('update', $ticket)
+                                    <a href="{{ route('tickets.edit', $ticket->id) }}" class="btn btn-outline-warning" title="Редагувати">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endcan
+                                @can('delete', $ticket)
+                                    <form action="{{ route('tickets.destroy', $ticket->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Ви дійсно бажаєте видалити цей квиток?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Видалити">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </div>
                         </td>
                     </tr>
