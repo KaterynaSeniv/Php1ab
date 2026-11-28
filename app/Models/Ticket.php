@@ -51,6 +51,11 @@ class Ticket extends Model
         return $this->belongsTo(TrainRoute::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class)->withTimestamps();

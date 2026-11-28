@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ConductorController;
-use App\Http\Controllers\RouteScheduleController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\TicketController;
+use App\Http\Controllers\SentryTestController;
+use App\Http\Controllers\Web\RouteScheduleController;
+use App\Http\Controllers\Web\ServiceController;
+use App\Http\Controllers\Web\TicketController;
 use App\Http\Controllers\WebAuthController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::view('/', 'home')->name('home');
 
 Route::get('/search', [RouteScheduleController::class, 'search'])->name('home.search');
 
@@ -34,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('tickets', TicketController::class);
     Route::put('/tickets/{ticket}/pay', [TicketController::class, 'pay'])->name('tickets.pay');
     Route::get('/tickets/{ticket}/voucher', [TicketController::class, 'voucher'])->name('tickets.voucher');
+    Route::get('/sentry/test', SentryTestController::class)->name('sentry.test');
 });
 
 Route::middleware('auth')->prefix('conductor')->name('conductor.')->group(function () {

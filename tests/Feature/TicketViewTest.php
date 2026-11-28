@@ -9,6 +9,7 @@ use App\Models\Ticket;
 use App\Models\TrainRoute;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class TicketViewTest extends TestCase
@@ -63,6 +64,7 @@ class TicketViewTest extends TestCase
         $route = TrainRoute::factory()->create();
         $service1 = Service::factory()->create();
         $service2 = Service::factory()->create();
+        Queue::fake();
 
         $createResponse = $this->actingAs($user)->post('/tickets', [
             'train_route_id' => $route->id,
