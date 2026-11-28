@@ -108,6 +108,173 @@
                     }
                 }
             }
+        },
+        "/tickets": {
+            "get": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Публічний список квитків без персональних даних гостей",
+                "operationId": "fff6e8146a3824d22764ad95a401f84f",
+                "responses": {
+                    "200": {
+                        "description": "Список квитків"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Створення квитка",
+                "operationId": "5c8efcc66a59d78df909c9a81e1aba91",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "train_route_id",
+                                    "passenger_full_name",
+                                    "car_number",
+                                    "seat_number"
+                                ],
+                                "properties": {
+                                    "train_route_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "passenger_full_name": {
+                                        "type": "string",
+                                        "example": "Іван Петренко"
+                                    },
+                                    "car_number": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "seat_number": {
+                                        "type": "integer",
+                                        "example": 12
+                                    },
+                                    "services": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Квиток створено"
+                    },
+                    "401": {
+                        "description": "Токен відсутній"
+                    },
+                    "422": {
+                        "description": "Помилка валідації"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/tickets/{ticket}": {
+            "get": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Публічний перегляд квитка з прихованими PII для гостей",
+                "operationId": "c06419abdf1cfa143b40c9f5f9f8e4ae",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Дані квитка"
+                    },
+                    "403": {
+                        "description": "Доступ заборонено"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Оновлення квитка",
+                "operationId": "dab26798d7428652e0e7225c7e05adfd",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Квиток оновлено"
+                    },
+                    "403": {
+                        "description": "Доступ заборонено"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tickets"
+                ],
+                "summary": "Видалення квитка",
+                "operationId": "3bab8b8a3f08cafe716de97c72c2f129",
+                "parameters": [
+                    {
+                        "name": "ticket",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Квиток видалено"
+                    },
+                    "403": {
+                        "description": "Доступ заборонено"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -123,6 +290,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Tickets",
+            "description": "Tickets"
         }
     ]
 }

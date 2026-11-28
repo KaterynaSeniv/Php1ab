@@ -9,6 +9,8 @@ on:
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
+    env:
+      SENTRY_LARAVEL_DSN: ""
 
     steps:
       - name: Checkout repository

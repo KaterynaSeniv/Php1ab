@@ -1,19 +1,22 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\TicketApiController;
+declare(strict_types=1);
+
+use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\TicketApiController;
+use App\Http\Controllers\HealthCheckController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::get('/tickets', [TicketApiController::class, 'index']);
-    Route::get('/tickets/{ticket}', [TicketApiController::class, 'show']);
+Route::get('/health', HealthCheckController::class)->name('api.health');
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/tickets', [TicketApiController::class, 'store']);
-        Route::put('/tickets/{ticket}', [TicketApiController::class, 'update']);
-        Route::delete('/tickets/{ticket}', [TicketApiController::class, 'destroy']);
+Route::prefix('v1')->name('api.v1.')->group(function (): void {
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+    Route::apiResource('tickets', TicketApiController::class)->only(['index', 'show']);
+
+    Route::middleware('auth:sanctum')->group(function (): void {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::apiResource('tickets', TicketApiController::class)->except(['index', 'show']);
     });
 });
